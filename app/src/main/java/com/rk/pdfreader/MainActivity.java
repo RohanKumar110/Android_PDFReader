@@ -9,14 +9,18 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -102,35 +106,22 @@ public class MainActivity extends AppCompatActivity {
 
     public void setCustomAdapter()
     {
-        String strName;
-        readFiles(directory);
-        for(int i=0;i<modelList.size();i++) {
-            strName = modelList.get(i).getFile().getName().replace(".pdf","");
-            modelList.get(i).setFileName(strName);
-        }
+        readFiles();
         customAdapter = new CustomAdapter(getApplicationContext(),modelList);
         listView.setAdapter(customAdapter);
     }
 
-    private void readFiles(File directory) {
-        File[] files = directory.listFiles();
+    private void readFiles() {
+        Uri uri = MediaStore.Files.getContentUri("external");
+        String[] projection = {MediaStore.Files.FileColumns.TITLE,MediaStore.Files.FileColumns.DATA};
+        String mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension("pdf");
+        String selectionMimetype = MediaStore.Files.FileColumns.MIME_TYPE + "=?";
+        String[] selectionArgs = {mimeType};
+        Cursor cursor = getContentResolver().query(uri,projection,selectionMimetype,selectionArgs,null);
+        while (cursor.moveToNext()){
 
-        if(files!= null && files.length > 0){
-
-            for(File file:files){
-
-                if(file.isDirectory()){
-                    readFiles(file);
-                }else{
-
-                    if(file.getName().endsWith(".pdf"))
-                    {
-                        FileModel model = new FileModel();
-                        model.setFile(file);
-                        modelList.add(model);
-                    }
-                }
-            }
+            FileModel model = new FileModel(cursor.getString(0),new File(cursor.getString(1)));
+            modelList.add(model);
         }
     }
 
