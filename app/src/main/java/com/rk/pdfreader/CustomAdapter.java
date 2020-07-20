@@ -4,9 +4,11 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,11 @@ public class CustomAdapter extends BaseAdapter implements Filterable {
             convertView = LayoutInflater.from(context).inflate(R.layout.custom_adapter,parent,false);
         }
         TextView textview = convertView.findViewById(R.id.txtFilename);
+        ImageView imageView = convertView.findViewById(R.id.imgView);
+
+        imageView.setAnimation(AnimationUtils.loadAnimation(context,R.anim.fade_transition_animation));
+        textview.setAnimation(AnimationUtils.loadAnimation(context,R.anim.fade_scale_animation));
+
         textview.setText(modelListFiltered.get(position).getFileName());
 
         return convertView;
